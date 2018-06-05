@@ -20,7 +20,7 @@ int main(int argc, char* args[])
 		
 			return 1;
 	    }
-	
+	//sdsdsdsd
 		
 	//dsfdfddffd
 			SDL_SetRenderDrawColor(g_pRenderer, 0, 0, 0, 255);
