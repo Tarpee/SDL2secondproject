@@ -1,24 +1,27 @@
-//#include <SDL.h>
-
-//SDL_Window* g_pWindow = 0;
-//SDL_Renderer* g_pRenderer = 0;
+#include "Game.h"
+#include <iostream>
 
 
 
+Game* g_game = 0;
 
-bool g_bRunning = true;
 
-int main()
+
+int main(int argc, char* argv[])
 {
-	init();
+	g_game = new Game();
 
-	while (g_bRunning)
+	g_game->init("Test",100,100,640,460,0);
+
+	while (g_game->running())
 	{
-		handleEvents();
-		update();
-		render();
+		g_game->handleEvents();
+		g_game->update();
+		g_game->render();
 	}
-	clean();
+	g_game->clean();
+
+	
 		
 		
 		return 0;
