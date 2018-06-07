@@ -1,10 +1,9 @@
 /*This source code copyrighted by Lazy Foo' Productions (2004-2015)
 and may not be redistributed without written permission.*/
 
-//Using SDL, SDL_image, SDL_ttf, SDL_mixer, standard IO, math, and strings
+//Using SDL, SDL_image, standard IO, and strings
 #include <SDL.h>
 #include <SDL_image.h>
-#include <SDL_mixer.h>
 #include <stdio.h>
 #include <string>
 
@@ -25,11 +24,6 @@ public:
 	//Loads image at specified path
 	bool loadFromFile(std::string path);
 
-#ifdef _SDL_TTF_H
-	//Creates image from font string
-	bool loadFromRenderedText(std::string textureText, SDL_Color textColor);
-#endif
-
 	//Deallocates texture
 	void free();
 
@@ -43,7 +37,7 @@ public:
 	void setAlpha(Uint8 alpha);
 
 	//Renders texture at given point
-	void render(int x, int y, SDL_Rect* clip = NULL, double angle = 0.0, SDL_Point* center = NULL, SDL_RendererFlip flip = SDL_FLIP_NONE);
+	void render(int x, int y, SDL_Rect* clip = NULL);
 
 	//Gets image dimensions
 	int getWidth();
@@ -73,17 +67,10 @@ SDL_Window* gWindow = NULL;
 //The window renderer
 SDL_Renderer* gRenderer = NULL;
 
-//Scene texture
-LTexture gPromptTexture;
-
-//The music that will be played
-Mix_Music *gMusic = NULL;
-
-//The sound effects that will be used
-Mix_Chunk *gScratch = NULL;
-Mix_Chunk *gHigh = NULL;
-Mix_Chunk *gMedium = NULL;
-Mix_Chunk *gLow = NULL;
+//Walking animation
+const int WALKING_ANIMATION_FRAMES = 4;
+SDL_Rect gSpriteClips[WALKING_ANIMATION_FRAMES];
+LTexture gSpriteSheetTexture;
 
 
 LTexture::LTexture()
@@ -141,43 +128,6 @@ bool LTexture::loadFromFile(std::string path)
 	return mTexture != NULL;
 }
 
-#ifdef _SDL_TTF_H
-bool LTexture::loadFromRenderedText(std::string textureText, SDL_Color textColor)
-{
-	//Get rid of preexisting texture
-	free();
-
-	//Render text surface
-	SDL_Surface* textSurface = TTF_RenderText_Solid(gFont, textureText.c_str(), textColor);
-	if (textSurface != NULL)
-	{
-		//Create texture from surface pixels
-		mTexture = SDL_CreateTextureFromSurface(gRenderer, textSurface);
-		if (mTexture == NULL)
-		{
-			printf("Unable to create texture from rendered text! SDL Error: %s\n", SDL_GetError());
-		}
-		else
-		{
-			//Get image dimensions
-			mWidth = textSurface->w;
-			mHeight = textSurface->h;
-		}
-
-		//Get rid of old surface
-		SDL_FreeSurface(textSurface);
-	}
-	else
-	{
-		printf("Unable to render text surface! SDL_ttf Error: %s\n", TTF_GetError());
-	}
-
-
-	//Return success
-	return mTexture != NULL;
-}
-#endif
-
 void LTexture::free()
 {
 	//Free texture if it exists
@@ -208,7 +158,7 @@ void LTexture::setAlpha(Uint8 alpha)
 	SDL_SetTextureAlphaMod(mTexture, alpha);
 }
 
-void LTexture::render(int x, int y, SDL_Rect* clip, double angle, SDL_Point* center, SDL_RendererFlip flip)
+void LTexture::render(int x, int y, SDL_Rect* clip)
 {
 	//Set rendering space and render to screen
 	SDL_Rect renderQuad = { x, y, mWidth, mHeight };
@@ -221,7 +171,7 @@ void LTexture::render(int x, int y, SDL_Rect* clip, double angle, SDL_Point* cen
 	}
 
 	//Render to screen
-	SDL_RenderCopyEx(gRenderer, mTexture, clip, &renderQuad, angle, center, flip);
+	SDL_RenderCopy(gRenderer, mTexture, clip, &renderQuad);
 }
 
 int LTexture::getWidth()
@@ -240,7 +190,7 @@ bool init()
 	bool success = true;
 
 	//Initialize SDL
-	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0)
+	if (SDL_Init(SDL_INIT_VIDEO) < 0)
 	{
 		printf("SDL could not initialize! SDL Error: %s\n", SDL_GetError());
 		success = false;
@@ -281,13 +231,6 @@ bool init()
 					printf("SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError());
 					success = false;
 				}
-
-				//Initialize SDL_mixer
-				if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0)
-				{
-					printf("SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError());
-					success = false;
-				}
 			}
 		}
 	}
@@ -300,48 +243,34 @@ bool loadMedia()
 	//Loading success flag
 	bool success = true;
 
-	//Load prompt texture
-	if (!gPromptTexture.loadFromFile("c:/Users/jason/source/repos/SDL2secondproject/prompt.png"))
+	//Load sprite sheet texture
+	if (!gSpriteSheetTexture.loadFromFile("c:/Users/jason/source/repos/SDL2secondprojectc/foo.png"))
 	{
-		printf("Failed to load prompt texture!\n");
+		printf("Failed to load walking animation texture!\n");
 		success = false;
 	}
-
-	//Load music
-	gMusic = Mix_LoadMUS("c:/Users/jason/source/repos/SDL2secondproject/beat.wav");
-	if (gMusic == NULL)
+	else
 	{
-		printf("Failed to load beat music! SDL_mixer Error: %s\n", Mix_GetError());
-		success = false;
-	}
+		//Set sprite clips
+		gSpriteClips[0].x = 0;
+		gSpriteClips[0].y = 0;
+		gSpriteClips[0].w = 64;
+		gSpriteClips[0].h = 205;
 
-	//Load sound effects
-	gScratch = Mix_LoadWAV("c:/Users/jason/source/repos/SDL2secondproject/scratch.wav");
-	if (gScratch == NULL)
-	{
-		printf("Failed to load scratch sound effect! SDL_mixer Error: %s\n", Mix_GetError());
-		success = false;
-	}
+		gSpriteClips[1].x = 64;
+		gSpriteClips[1].y = 0;
+		gSpriteClips[1].w = 64;
+		gSpriteClips[1].h = 205;
 
-	gHigh = Mix_LoadWAV("c:/Users/jason/source/repos/SDL2secondproject/high.wav");
-	if (gHigh == NULL)
-	{
-		printf("Failed to load high sound effect! SDL_mixer Error: %s\n", Mix_GetError());
-		success = false;
-	}
+		gSpriteClips[2].x = 128;
+		gSpriteClips[2].y = 0;
+		gSpriteClips[2].w = 64;
+		gSpriteClips[2].h = 205;
 
-	gMedium = Mix_LoadWAV("c:/Users/jason/source/repos/SDL2secondproject/medium.wav");
-	if (gMedium == NULL)
-	{
-		printf("Failed to load medium sound effect! SDL_mixer Error: %s\n", Mix_GetError());
-		success = false;
-	}
-
-	gLow = Mix_LoadWAV("c:/Users/jason/source/repos/SDL2secondproject/low.wav");
-	if (gLow == NULL)
-	{
-		printf("Failed to load low sound effect! SDL_mixer Error: %s\n", Mix_GetError());
-		success = false;
+		gSpriteClips[3].x = 196;
+		gSpriteClips[3].y = 0;
+		gSpriteClips[3].w = 64;
+		gSpriteClips[3].h = 205;
 	}
 
 	return success;
@@ -350,21 +279,7 @@ bool loadMedia()
 void close()
 {
 	//Free loaded images
-	gPromptTexture.free();
-
-	//Free the sound effects
-	Mix_FreeChunk(gScratch);
-	Mix_FreeChunk(gHigh);
-	Mix_FreeChunk(gMedium);
-	Mix_FreeChunk(gLow);
-	gScratch = NULL;
-	gHigh = NULL;
-	gMedium = NULL;
-	gLow = NULL;
-
-	//Free the music
-	Mix_FreeMusic(gMusic);
-	gMusic = NULL;
+	gSpriteSheetTexture.free();
 
 	//Destroy window	
 	SDL_DestroyRenderer(gRenderer);
@@ -373,7 +288,6 @@ void close()
 	gRenderer = NULL;
 
 	//Quit SDL subsystems
-	Mix_Quit();
 	IMG_Quit();
 	SDL_Quit();
 }
@@ -400,6 +314,9 @@ int main(int argc, char* args[])
 			//Event handler
 			SDL_Event e;
 
+			//Current animation frame
+			int frame = 0;
+
 			//While application is running
 			while (!quit)
 			{
@@ -411,73 +328,27 @@ int main(int argc, char* args[])
 					{
 						quit = true;
 					}
-					//Handle key press
-					else if (e.type == SDL_KEYDOWN)
-					{
-						switch (e.key.keysym.sym)
-						{
-							//Play high sound effect
-						case SDLK_1:
-							Mix_PlayChannel(-1, gHigh, 0);
-							break;
-
-							//Play medium sound effect
-						case SDLK_2:
-							Mix_PlayChannel(-1, gMedium, 0);
-							break;
-
-							//Play low sound effect
-						case SDLK_3:
-							Mix_PlayChannel(-1, gLow, 0);
-							break;
-
-							//Play scratch sound effect
-						case SDLK_4:
-							Mix_PlayChannel(-1, gScratch, 0);
-							break;
-
-						case SDLK_9:
-							//If there is no music playing
-							if (Mix_PlayingMusic() == 0)
-							{
-								//Play the music
-								Mix_PlayMusic(gMusic, -1);
-							}
-							//If music is being played
-							else
-							{
-								//If the music is paused
-								if (Mix_PausedMusic() == 1)
-								{
-									//Resume the music
-									Mix_ResumeMusic();
-								}
-								//If the music is playing
-								else
-								{
-									//Pause the music
-									Mix_PauseMusic();
-								}
-							}
-							break;
-
-						case SDLK_0:
-							//Stop the music
-							Mix_HaltMusic();
-							break;
-						}
-					}
 				}
 
 				//Clear screen
 				SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
 				SDL_RenderClear(gRenderer);
 
-				//Render prompt
-				gPromptTexture.render(0, 0);
+				//Render current frame
+				SDL_Rect* currentClip = &gSpriteClips[frame / 4];
+				gSpriteSheetTexture.render((SCREEN_WIDTH - currentClip->w) / 2, (SCREEN_HEIGHT - currentClip->h) / 2, currentClip);
 
 				//Update screen
 				SDL_RenderPresent(gRenderer);
+
+				//Go to next frame
+				++frame;
+
+				//Cycle animation
+				if (frame / 4 >= WALKING_ANIMATION_FRAMES)
+				{
+					frame = 0;
+				}
 			}
 		}
 	}
