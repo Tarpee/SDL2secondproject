@@ -301,14 +301,14 @@ bool loadMedia()
 	bool success = true;
 
 	//Load prompt texture
-	if (!gPromptTexture.loadFromFile("c:/Users/jason/source/repos/SDL2secondprojectc/prompt.png"))
+	if (!gPromptTexture.loadFromFile("c:/Users/jason/source/repos/SDL2secondproject/prompt.png"))
 	{
 		printf("Failed to load prompt texture!\n");
 		success = false;
 	}
 
 	//Load music
-	gMusic = Mix_LoadMUS("c:/Users/jason/source/repos/SDL2secondprojectc/beat.wav");
+	gMusic = Mix_LoadMUS("c:/Users/jason/source/repos/SDL2secondproject/beat.wav");
 	if (gMusic == NULL)
 	{
 		printf("Failed to load beat music! SDL_mixer Error: %s\n", Mix_GetError());
@@ -316,28 +316,28 @@ bool loadMedia()
 	}
 
 	//Load sound effects
-	gScratch = Mix_LoadWAV("c:/Users/jason/source/repos/SDL2secondprojectc/scratch.wav");
+	gScratch = Mix_LoadWAV("c:/Users/jason/source/repos/SDL2secondproject/scratch.wav");
 	if (gScratch == NULL)
 	{
 		printf("Failed to load scratch sound effect! SDL_mixer Error: %s\n", Mix_GetError());
 		success = false;
 	}
 
-	gHigh = Mix_LoadWAV("c:/Users/jason/source/repos/SDL2secondprojectc/high.wav");
+	gHigh = Mix_LoadWAV("c:/Users/jason/source/repos/SDL2secondproject/high.wav");
 	if (gHigh == NULL)
 	{
 		printf("Failed to load high sound effect! SDL_mixer Error: %s\n", Mix_GetError());
 		success = false;
 	}
 
-	gMedium = Mix_LoadWAV("c:/Users/jason/source/repos/SDL2secondprojectc/medium.wav");
+	gMedium = Mix_LoadWAV("c:/Users/jason/source/repos/SDL2secondproject/medium.wav");
 	if (gMedium == NULL)
 	{
 		printf("Failed to load medium sound effect! SDL_mixer Error: %s\n", Mix_GetError());
 		success = false;
 	}
 
-	gLow = Mix_LoadWAV("c:/Users/jason/source/repos/SDL2secondprojectc/low.wav");
+	gLow = Mix_LoadWAV("c:/Users/jason/source/repos/SDL2secondproject/low.wav");
 	if (gLow == NULL)
 	{
 		printf("Failed to load low sound effect! SDL_mixer Error: %s\n", Mix_GetError());
