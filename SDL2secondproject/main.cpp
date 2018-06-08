@@ -1,138 +1,68 @@
-/*This source code copyrighted by Lazy Foo' Productions (2004-2015)
-and may not be redistributed without written permission.*/
-
-//Using SDL and standard IO
 #include <SDL.h>
-#include <stdio.h>
 
-//Screen dimension constants
-const int SCREEN_WIDTH = 640;
-const int SCREEN_HEIGHT = 480;
-
-//Starts up SDL and creates window
-bool init();
-
-//Loads media
-bool loadMedia();
-
-//Frees media and shuts down SDL
-void close();
-
-//The window we'll be rendering to
-SDL_Window* gWindow = NULL;
-
-//The surface contained by the window
-SDL_Surface* gScreenSurface = NULL;
-
-//The image we will load and show on the screen
-SDL_Surface* gXOut = NULL;
-
-bool init()
+int main(int argc, char ** argv)
 {
-	//Initialization flag
-	bool success = true;
+	// variables
 
-	//Initialize SDL
-	if (SDL_Init(SDL_INIT_VIDEO) < 0)
+	bool quit = false;
+	SDL_Event event;
+	int x = 288;
+	int y = 208;
+
+	// init SDL
+
+	SDL_Init(SDL_INIT_VIDEO);
+	SDL_Window * window = SDL_CreateWindow("SDL2 Keyboard/Mouse events",
+		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 480, 0);
+	SDL_Renderer * renderer = SDL_CreateRenderer(window, -1, 0);
+
+	SDL_Surface * image = SDL_LoadBMP("c:/Users/jason/source/repos/SDL2secondproject/spaceship.bmp");
+	SDL_Texture * texture = SDL_CreateTextureFromSurface(renderer,
+		image);
+	SDL_FreeSurface(image);
+
+	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+
+	// handle events
+
+	while (!quit)
 	{
-		printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
-		success = false;
-	}
-	else
-	{
-		//Create window
-		gWindow = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
-		if (gWindow == NULL)
+		SDL_Delay(10);
+		SDL_PollEvent(&event);
+
+		switch (event.type)
 		{
-			printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
-			success = false;
-		}
-		else
-		{
-			//Get window surface
-			gScreenSurface = SDL_GetWindowSurface(gWindow);
-		}
-	}
-
-	return success;
-}
-
-bool loadMedia()
-{
-	//Loading success flag
-	bool success = true;
-
-	//Load splash image
-	gXOut = SDL_LoadBMP("c:/Users/jason/source/repos/SDL2secondprojectc/x.bmp");
-	if (gXOut == NULL)
-	{
-		printf("Unable to load image %s! SDL Error: %s\n", "03_event_driven_programming/x.bmp", SDL_GetError());
-		success = false;
-	}
-
-	return success;
-}
-
-void close()
-{
-	//Deallocate surface
-	SDL_FreeSurface(gXOut);
-	gXOut = NULL;
-
-	//Destroy window
-	SDL_DestroyWindow(gWindow);
-	gWindow = NULL;
-
-	//Quit SDL subsystems
-	SDL_Quit();
-}
-
-int main(int argc, char* args[])
-{
-	//Start up SDL and create window
-	if (!init())
-	{
-		printf("Failed to initialize!\n");
-	}
-	else
-	{
-		//Load media
-		if (!loadMedia())
-		{
-			printf("Failed to load media!\n");
-		}
-		else
-		{
-			//Main loop flag
-			bool quit = false;
-
-			//Event handler
-			SDL_Event e;
-
-			//While application is running
-			while (!quit)
+		case SDL_QUIT:
+			quit = true;
+			break;
+		case SDL_KEYDOWN:
+			switch (event.key.keysym.sym)
 			{
-				//Handle events on queue
-				while (SDL_PollEvent(&e) != 0)
-				{
-					//User requests quit
-					if (e.type == SDL_QUIT)
-					{
-						quit = true;
-					}
-				}
-
-				//Apply the image
-				SDL_BlitSurface(gXOut, NULL, gScreenSurface, NULL);
-
-				//Update the surface
-				SDL_UpdateWindowSurface(gWindow);
+			case SDLK_LEFT:  x--; break;
+			case SDLK_RIGHT: x++; break;
+			case SDLK_UP:    y--; break;
+			case SDLK_DOWN:  y++; break;
 			}
+
+			break;
+
 		}
+
+		SDL_Rect dstrect = { x, y, 64, 64 };
+
+		SDL_RenderClear(renderer);
+		SDL_RenderCopy(renderer, texture, NULL, &dstrect);
+		SDL_RenderPresent(renderer);
+		
 	}
 
-	//Free resources and close SDL
-	close();
+
+	// cleanup SDL
+
+	SDL_DestroyTexture(texture);
+	SDL_DestroyRenderer(renderer);
+	SDL_DestroyWindow(window);
+	SDL_Quit();
 
 	return 0;
 }
