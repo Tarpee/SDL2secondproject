@@ -1,32 +1,68 @@
-#include "Game.h"
-#include <iostream>
 
+	
+#include <SDL.h>
 
-
-Game* g_game = 0;
-
-
-
-int main(int argc, char* argv[])
+int main(int argc, char ** argv)
 {
-	g_game = new Game();
+	// variables
 
-	g_game->init("Test",100,100,640,460,0);
+	bool quit = false;
+	SDL_Event event;
+	int x = 288;
+	int y = 208;
 
-	while (g_game->running())
+	// init SDL
+
+	SDL_Init(SDL_INIT_VIDEO);
+	SDL_Window * window = SDL_CreateWindow("SDL2 Keyboard/Mouse events",
+		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 480, 0);
+	SDL_Renderer * renderer = SDL_CreateRenderer(window, -1, 0);
+
+	SDL_Surface * image = SDL_LoadBMP("c:/Users/jason/source/repos/SDL2secondproject/spaceship.bmp");
+	SDL_Texture * texture = SDL_CreateTextureFromSurface(renderer,
+		image);
+	SDL_FreeSurface(image);
+
+	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+
+	// handle events
+
+	while (!quit)
 	{
-		g_game->handleEvents();
-		//g_game->update();
-		g_game->render();
+		SDL_Delay(10);
+		SDL_PollEvent(&event);
+
+		switch (event.type)
+		{
+		case SDL_QUIT:
+			quit = true;
+			break;
+		case SDL_KEYDOWN:
+			switch (event.key.keysym.sym)
+			{
+			case SDLK_LEFT:  x--; break;
+			case SDLK_RIGHT: x++; break;
+			case SDLK_UP:    y--; break;
+			case SDLK_DOWN:  y++; break;
+			}
+
+			break;
+
+		}
+
+		SDL_Rect dstrect = { x, y, 64, 64 };
+
+		SDL_RenderClear(renderer);
+		SDL_RenderCopy(renderer, texture, NULL, &dstrect);
+		SDL_RenderPresent(renderer);
 	}
-	g_game->clean();
 
-	
-		
-		
-		return 0;
+	// cleanup SDL
+
+	SDL_DestroyTexture(texture);
+	SDL_DestroyRenderer(renderer);
+	SDL_DestroyWindow(window);
+	SDL_Quit();
+
+	return 0;
 }
-	
-	
-
-
