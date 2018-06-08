@@ -68,11 +68,11 @@ int main(int argc, char ** argv)
 				break;
 			case SDLK_UP:
 				if (xvel > 0)
-					xvel = 0;
+					yvel = 0;
 				break;
 			case SDLK_DOWN:
 				if (xvel > 0)
-					xvel = 0;
+					yvel = 0;
 				break;
 			default:
 				break;
