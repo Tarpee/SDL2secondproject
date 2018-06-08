@@ -44,8 +44,8 @@ int main(int argc, char ** argv)
 		case SDL_KEYDOWN:
 			switch (event.key.keysym.sym)
 			{
-			case SDLK_LEFT:  xvel = -2; break;
-			case SDLK_RIGHT: xvel = 1; break;
+			case SDLK_LEFT:  xvel = -1; break;
+			case SDLK_RIGHT: xvel =  1; break;
 			case SDLK_UP:    yvel = -1; break;
 			case SDLK_DOWN:  yvel = 1; break;
 			default:
@@ -63,15 +63,15 @@ int main(int argc, char ** argv)
 					xvel = 0;
 				break;
 			case SDLK_RIGHT:
-				if (xvel > 0)
+				if (xvel < 0)
 					xvel = 0;
 				break;
 			case SDLK_UP:
-				if (xvel > 0)
+				if (yvel > 0)
 					yvel = 0;
 				break;
 			case SDLK_DOWN:
-				if (xvel > 0)
+				if (yvel < 0)
 					yvel = 0;
 				break;
 			default:
