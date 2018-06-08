@@ -27,7 +27,7 @@ int main(int argc, char ** argv)
 
 	while (!quit)
 	{
-		SDL_Delay(10);
+		SDL_Delay(3);
 		SDL_PollEvent(&event);
 
 		switch (event.type)
