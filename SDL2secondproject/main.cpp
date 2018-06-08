@@ -10,6 +10,9 @@ int main(int argc, char ** argv)
 	SDL_Event event;
 	int x = 288;
 	int y = 208;
+	int xvel = 0;
+	int yvel = 0;
+	
 
 	// init SDL
 
@@ -29,7 +32,7 @@ int main(int argc, char ** argv)
 
 	while (!quit)
 	{
-		SDL_Delay(10);
+		SDL_Delay(5);
 		SDL_PollEvent(&event);
 
 		switch (event.type)
@@ -37,18 +40,52 @@ int main(int argc, char ** argv)
 		case SDL_QUIT:
 			quit = true;
 			break;
+
 		case SDL_KEYDOWN:
 			switch (event.key.keysym.sym)
 			{
-			case SDLK_LEFT:  x--; break;
-			case SDLK_RIGHT: x++; break;
-			case SDLK_UP:    y--; break;
-			case SDLK_DOWN:  y++; break;
+			case SDLK_LEFT:  xvel = -2; break;
+			case SDLK_RIGHT: xvel = 1; break;
+			case SDLK_UP:    yvel = -1; break;
+			case SDLK_DOWN:  yvel = 1; break;
+			default:
+				break;
+
+
 			}
 
+		//	break;
+		case SDL_KEYUP:
+			switch (event.key.keysym.sym)
+			{
+			case SDLK_LEFT:
+				if (xvel > 0)
+					xvel = 0;
+				break;
+			case SDLK_RIGHT:
+				if (xvel > 0)
+					xvel = 0;
+				break;
+			case SDLK_UP:
+				if (xvel > 0)
+					xvel = 0;
+				break;
+			case SDLK_DOWN:
+				if (xvel > 0)
+					xvel = 0;
+				break;
+			default:
+				break;
+			}
 			break;
-
+		  default:
+			break;
 		}
+		x += xvel;
+		y += yvel;
+
+		
+
 
 		SDL_Rect dstrect = { x, y, 64, 64 };
 
@@ -56,6 +93,7 @@ int main(int argc, char ** argv)
 		SDL_RenderCopy(renderer, texture, NULL, &dstrect);
 		SDL_RenderPresent(renderer);
 	}
+ 
 
 	// cleanup SDL
 
@@ -63,6 +101,8 @@ int main(int argc, char ** argv)
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
+
+
 
 	return 0;
 }
